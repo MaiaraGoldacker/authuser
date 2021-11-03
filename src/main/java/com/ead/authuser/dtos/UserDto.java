@@ -6,6 +6,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.ead.authuser.validation.UsernameConstraint;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -25,23 +26,24 @@ public class UserDto {
 	private UUID userId;
 
 	@NotBlank(groups = UserView.RegistrationPost.class)
-	@Size(min=4, max=50)
+	@Size(min=4, max=50, groups = UserView.RegistrationPost.class)
 	@JsonView(UserView.RegistrationPost.class)
+	@UsernameConstraint(groups = UserView.RegistrationPost.class)
 	private String username;
 	
 	@NotBlank(groups = UserView.RegistrationPost.class)
-	@Email
-	@Size(min=4, max=50)
+	@Email(groups = UserView.RegistrationPost.class)
+	@Size(min=4, max=50, groups = UserView.RegistrationPost.class)
 	@JsonView(UserView.RegistrationPost.class)
 	private String email;
 
 	@NotBlank(groups = {UserView.RegistrationPost.class, UserView.PasswordPut.class})
 	@JsonView({UserView.RegistrationPost.class, UserView.PasswordPut.class})
-	@Size(min=6, max=20)
+	@Size(min=6, max=20, groups ={UserView.RegistrationPost.class, UserView.PasswordPut.class})
 	private String password;
 	
 	@NotBlank(groups = UserView.PasswordPut.class)
-	@Size(min=6, max=20)
+	@Size(min=6, max=20, groups = UserView.PasswordPut.class)
 	@JsonView(UserView.PasswordPut.class)
 	private String oldPassword;
 
