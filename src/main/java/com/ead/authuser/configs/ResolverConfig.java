@@ -1,4 +1,4 @@
-package com.ead.configs;
+package com.ead.authuser.configs;
 
 
 import net.kaczmarzyk.spring.data.jpa.web.SpecificationArgumentResolver;
