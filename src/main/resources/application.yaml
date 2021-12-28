@@ -15,3 +15,10 @@ spring:
     properties:
       hibernate:
         show-sql: true
+  output:
+    ansi:
+      enabled: ALWAYS
+logging:
+  level:
+    com.ead: TRACE
+    root: INFO
