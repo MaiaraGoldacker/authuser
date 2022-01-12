@@ -60,7 +60,7 @@ public class AuthenticationController {
 		userModel.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
 		userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
 
-		userService.save(userModel);
+		userService.saveUser(userModel);
 		log.debug("POST registerUser userId received {} ", userModel.getUserId());
 		log.info("User saved successfully UserId {}", userModel.getUserId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(userModel);

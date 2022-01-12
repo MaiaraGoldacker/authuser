@@ -13,11 +13,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.FetchMode;
+import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.RepresentationModel;
 
+import com.ead.authuser.dtos.UserEventDto;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -76,13 +80,12 @@ public class UserModel extends RepresentationModel<UserModel> implements Seriali
 	@Column(nullable = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
 	private LocalDateTime lastUpdateDate;
-	
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-	private Set<UserCourseModel> usersCourses;
-	
-	public UserCourseModel convertToUserCourseModel(UUID courseId) {
-		return new UserCourseModel(null, this, courseId);
-	}
 
+	public UserEventDto convertToUserEventDto() {
+		var userEventDto = new UserEventDto();
+		BeanUtils.copyProperties(this, userEventDto);
+		userEventDto.setUserType(this.getUserType().toString());
+		userEventDto.setUserStatus(this.getUserStatus().toString());
+		return userEventDto;
+	}
 }
