@@ -11,7 +11,7 @@ import net.kaczmarzyk.spring.data.jpa.domain.Like;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
-import com.ead.authuser.models.UserCourseModel;
+
 public class SpecificationTemplate {
 
 	@And({
@@ -21,12 +21,4 @@ public class SpecificationTemplate {
 		@Spec(path="fullName", spec= Like.class)
 	})
 	public interface UserSpec extends Specification<UserModel> {}
-	
-	public static Specification<UserModel> userCourseId(final UUID courseId) {
-		return (root, query, cb) -> {
-			query.distinct(true);
-			Join<UserModel, UserCourseModel> userProd = root.join("usersCourses");
-			return cb.equal(userProd.get("courseId"), courseId);
-		};	
-	}
 }

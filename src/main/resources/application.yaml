@@ -5,8 +5,16 @@ server:
 spring:
   application:
     name: ead-authuser-service
+  config:
+    import: 'optional:configserver:'
+  clound:
+    config:
+      discovery:
+        serviceId: ead-config-server
+      username: configserver
+      password: 'ead123'
   datasource:
-    url: jdbc:postgresql://localhost:5432/ead-authuser
+    url: jdbc:postgresql://localhost:5432/ead-authuser-v2
     username: postgres
     password: Gold#3366
   jpa:
@@ -21,18 +29,39 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-logging:
-  level:
-    com.ead: TRACE
-    root: INFO
+  rabbitmq:
+    addresses: amqps://fwivvzvm:OTO_tgdrr0wY0YXUQvY9-bZLBSekc2js@crow.rmq.cloudamqp.com/fwivvzvm
 ead:
   api:
     url:
       course: 'http://ead-course-service/ead-course'
+  auth:
+    jwtSecret: p3s6v9y$B?E(H+MbQeThWmZq4t7w!z%C*F)J@NcRfUjXn2r5u8x/A?D(G+KaPdSg
+    jwtExpirationMS: 14400000
+  broker:
+    exchange:
+      userEvent: ead.userevent
+  serviceRegistry:
+    username: serviceregistry
+    password: 'ead123'          
 eureka:
   client:
     service-url:
-      defaultZone: 'http://localhost:8761/eureka'
+      defaultZone: 'http://${ead.serviceRegistry.username}:${ead.serviceRegistry.password}@localhost:8761/eureka'
   instance:
     hostname: localhost
-        
+resilience4j:
+  circuitbreaker:
+    instances:
+      circuitbreakerInstance:
+        sliding-window-size: 30
+        permitted-number-of-calls-in-half-open-state: 2
+        sliding-window-type: TIME_BASED
+        minimum-number-of-calls: 2
+        wait-duration-in-open-state: 30s
+        failure-rate-threshold: 80
+  retry:
+    instances:
+      retryInstance:
+        maxRetryAttempts: 3
+        waitDuration: 5s

@@ -13,9 +13,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.ead.authuser.clients.CourseClient;
-import com.ead.authuser.models.UserCourseModel;
+import com.ead.authuser.enums.ActionType;
 import com.ead.authuser.models.UserModel;
-import com.ead.authuser.repositories.UserCourseRepository;
+import com.ead.authuser.publishers.UserEventPublisher;
 import com.ead.authuser.repositories.UserRepository;
 import com.ead.authuser.service.UserService;
 
@@ -26,9 +26,10 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 	
 	@Autowired
-	private CourseClient courseClient;
+	private UserEventPublisher userEventPublisher;
 	
-	private UserCourseRepository userCourseRepository;
+	@Autowired
+	private CourseClient courseClient;
 
 	@Override
 	public List<UserModel> findAll() {	
@@ -43,23 +44,20 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	@Override
 	public void delete(UserModel userModel) {
-		boolean deleteUserCourseInCourse = false;
-		List<UserCourseModel> userCourseModelList = userCourseRepository.findAllUserCourseIntoUser(userModel.getUserId());
-		
-		if (!userCourseModelList.isEmpty()) {
-			userCourseRepository.deleteAll(userCourseModelList);
-			deleteUserCourseInCourse = true;
-		}
 		userRepository.delete(userModel);	
-		
-		if (deleteUserCourseInCourse) {
-			courseClient.deleteUserInCourse(userModel.getUserId());
-		}
 	}
 
 	@Override
-	public void save(UserModel userModel) {
-		userRepository.save(userModel);		
+	public UserModel save(UserModel userModel) {
+		return userRepository.save(userModel);		
+	}
+	
+	@Transactional
+	@Override
+	public UserModel saveUser(UserModel userModel) {
+		userModel = save(userModel);
+		userEventPublisher.publishUserEvent(userModel.convertToUserEventDto(), ActionType.CREATE);
+		return userModel;
 	}
 
 	@Override
@@ -75,6 +73,26 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Page<UserModel> findAll(Specification<UserModel> spec, Pageable pageable) {
 		return userRepository.findAll(spec, pageable);
+	}
+
+	@Transactional
+	@Override
+	public void deleteUser(UserModel userModel) {
+		delete(userModel);
+		userEventPublisher.publishUserEvent(userModel.convertToUserEventDto(), ActionType.DELETE);
+	}
+
+	@Transactional
+	@Override
+	public UserModel updateUser(UserModel userModel) {
+		userModel = save(userModel);
+		userEventPublisher.publishUserEvent(userModel.convertToUserEventDto(), ActionType.UPDATE);
+		return userModel;
+	}
+
+	@Override
+	public UserModel updatePassword(UserModel userModel) {
+		return save(userModel);
 	}
 
 }
