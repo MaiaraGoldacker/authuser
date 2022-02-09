@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
@@ -22,8 +23,8 @@ import com.ead.authuser.dtos.ResponsePageDto;
 import com.ead.authuser.service.UtilsService;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpEntity;
 
 @Log4j2
 @Component
@@ -40,14 +41,17 @@ public class CourseClient {
 
 	//@Retry(name = "retryInstance") //Vai pegar configuração do application.yml. Lá definimos que o método pode esperar 5s por nada resposta, e ele vai tentar fazer isso 3 vezes, antes de retornar falha
 	@CircuitBreaker(name = "circuitbreakerInstance", fallbackMethod = "circuitBreakerfallback")
-	public Page<CourseDto> getAllCoursesByUser(UUID userId, Pageable pageable){
+	public Page<CourseDto> getAllCoursesByUser(UUID userId, Pageable pageable, String token) {
 		List<CourseDto> searchResult = null;
 		String url = REQUEST_URL_COURSE + utilsService.createURL(userId, pageable);
+	     HttpHeaders headers = new HttpHeaders();
+	     headers.set("Authorization", token);
+	     HttpEntity<String> requestEntity = new HttpEntity<String>("parameters", headers);
 		log.debug("Request URL {}", url);
 		log.info("Request URL {}", url);
 		try {
 			ParameterizedTypeReference<ResponsePageDto<CourseDto>> responseType = new ParameterizedTypeReference<ResponsePageDto<CourseDto>>() {};
-			ResponseEntity<ResponsePageDto<CourseDto>> result = restTemplate.exchange(url, HttpMethod.GET, null, responseType);
+			ResponseEntity<ResponsePageDto<CourseDto>> result = restTemplate.exchange(url, HttpMethod.GET, requestEntity, responseType);
 			searchResult = result.getBody().getContent();
 			log.debug("Response Number of Elements {}", searchResult.size());
 		} catch (HttpStatusCodeException e) {

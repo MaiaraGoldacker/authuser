@@ -35,6 +35,9 @@ ead:
   api:
     url:
       course: 'http://ead-course-service/ead-course'
+  auth:
+    jwtSecret: p3s6v9y$B?E(H+MbQeThWmZq4t7w!z%C*F)J@NcRfUjXn2r5u8x/A?D(G+KaPdSg
+    jwtExpirationMS: 14400000
   broker:
     exchange:
       userEvent: ead.userevent
